@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="geektime.spring.springbucks.mapper.OrderMapper">
+    <resultMap id="coffeeOrderResultMap" type="geektime.spring.springbucks.model.CoffeeOrder">
+        <id column="order_id" property="id" />
+        <result column="customer" property="customer" />
+        <result column="state" property="state" />
+        <result column="order_create_time" property="createTime" />
+        <result column="order_update_time" property="updateTime" />
+        <collection property="items" ofType="geektime.spring.springbucks.model.Coffee">
+            <id column="coffee_id" property="id" />
+            <result column="coffee_name" property="name" />
+            <result column="price" property="price" />
+            <result column="coffee_create_time" property="createTime" />
+            <result column="coffee_update_time" property="updateTime" />
+        </collection>
+    </resultMap>
+
+    <select id="findOrdersByIds" resultMap="coffeeOrderResultMap">
+        SELECT
+            s.id as order_id,
+            s.customer as customer,
+            s.state as state,
+            s.create_time as order_create_time,
+            s.update_time as order_update_time,
+            c.id as coffee_id,
+            c.name as coffee_name,
+            c.price as price,
+            c.create_time as coffee_create_time,
+            c.update_time as coffee_update_time
+        FROM t_order s
+        LEFT JOIN t_order_coffee rel
+            ON s.id = rel.coffee_order_id
+        LEFT JOIN t_coffee c
+            ON c.id = rel.items_id
+        <where>
+            <if test="ids != null and ids.size() != 0">
+                s.id IN
+                <foreach item="item" collection="ids" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <delete id="deleteByIds">
+        DELETE FROM t_order WHERE id IN
+        <foreach collection="ids" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </delete>
+</mapper>
