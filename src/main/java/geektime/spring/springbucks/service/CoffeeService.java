@@ -34,7 +34,7 @@ public class CoffeeService {
      * @param name 咖啡名字
      * @return 咖啡列表
      */
-    @Cacheable
+    @Cacheable(key = "'coffeeList'")
     public List<Coffee> listCoffeeByName(String name){
         return coffeeMapper.selectCoffeesByName(StringUtils.hasLength(name) ? "%" + name + "%" : null);
     }
@@ -46,7 +46,7 @@ public class CoffeeService {
      * @param pageSize 页面大小
      * @return 咖啡分页信息
      */
-    @Cacheable
+    @Cacheable(key = "'pageCoffee'")
     public PageInfo<Coffee> pageCoffeeByName(int pageNum, int pageSize){
         PageHelper.startPage(pageNum, pageSize);
         List<Coffee> coffees = coffeeMapper.selectCoffeesByName(null);
