@@ -10,3 +10,6 @@ homework of springbucks
 (2) 2023/03/23 第二次提交
 1. 写代码实现 Spring Bean 的装配，包括两种方式：XML、Annotation;
 2. 通过 springmvc 实现 restful 查询数据接口, 可通过设置请求头的 Accept 值, 决定返回 json/xml 格式的数据。
+
+(3) 2023/04/13 第三次提交
+* 通过 spring stream 访问 rabbit mq 与kafka
