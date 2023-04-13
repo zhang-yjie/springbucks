@@ -2,6 +2,7 @@ package geektime.spring.springbucks.service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import geektime.spring.springbucks.integration.Barista;
 import geektime.spring.springbucks.mapper.CoffeeMapper;
 import geektime.spring.springbucks.mapper.OrderCoffeeRelMapper;
 import geektime.spring.springbucks.mapper.OrderMapper;
@@ -13,12 +14,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -37,6 +40,9 @@ public class CoffeeOrderService {
 
     @Autowired
     private OrderCacheRepository orderCacheRepository;
+
+    @Autowired
+    private Barista barista;
 
     /**
      * 保存订单信息
@@ -103,7 +109,14 @@ public class CoffeeOrderService {
     public boolean updateState(Long id, String state){
         OrderState orderState = OrderState.valueOf(state);
         int result = orderMapper.updateStatusById(id, orderState.getState());
-        return result > 0;
+        if(result <= 0){
+            return false;
+        }
+        // 如果更新为已付款 则向MQ发送消息
+        if(Objects.equals(OrderState.PAID.getKey(), state)){
+            barista.newOrders().send(MessageBuilder.withPayload(id).build());
+        }
+        return true;
     }
 
     /**
